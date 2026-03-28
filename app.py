@@ -3,19 +3,21 @@ import numpy as np
 import tensorflow as tf
 from PIL import Image
 
-# Load model
-model = tf.keras.models.load_model("skin_disease_model.h5")
-
-# أسماء الأمراض (بدليهم إذا مختلفين عندك)
-class_names = ["healthy", "acne", "eczema"]
-
 st.title("🩺 Skin Disease Detection AI")
 
-uploaded_file = st.file_uploader("Upload image")
+@st.cache_resource
+def load_model():
+    return tf.keras.models.load_model("skin_disease_model.h5")
+
+model = load_model()
+
+class_names = ["healthy", "acne", "eczema"]
+
+uploaded_file = st.file_uploader("Upload image", type=["jpg","png","jpeg"])
 
 if uploaded_file is not None:
-    img = Image.open(uploaded_file)
-    st.image(img)
+    img = Image.open(uploaded_file).convert("RGB")
+    st.image(img, caption="Uploaded Image")
 
     img = img.resize((224,224))
     img_array = np.array(img)/255.0
@@ -24,4 +26,4 @@ if uploaded_file is not None:
     pred = model.predict(img_array)
     result = class_names[np.argmax(pred)]
 
-    st.success("Prediction: " + result)
+    st.success(f"Prediction: {result}")
