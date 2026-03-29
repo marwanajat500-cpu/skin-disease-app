@@ -1,13 +1,25 @@
 import streamlit as st
 import numpy as np
 from PIL import Image
+from keras.models import load_model
 
-st.title("🩺 Skin Disease App (Demo)")
+st.title("🩺 Skin Disease Detection AI")
 
-uploaded_file = st.file_uploader("Upload image", type=["jpg","png","jpeg"])
+# تحميل الموديل
+model = load_model("skin_model.h5")
 
-if uploaded_file:
-    image = Image.open(uploaded_file)
+file = st.file_uploader("Télécharger une image", type=["jpg", "png", "jpeg"])
+
+if file:
+    image = Image.open(file)
     st.image(image)
 
-    st.success("Demo mode: model not loaded yet")
+    # تجهيز الصورة
+    img = image.resize((224, 224))
+    img = np.array(img) / 255.0
+    img = img.reshape(1, 224, 224, 3)
+
+    # prediction
+    prediction = model.predict(img)
+
+    st.success(f"Résultat: {prediction}")
